@@ -960,19 +960,20 @@ class chi2sum:
             
             if len(R) > 1:
                 S = self._getChi2Sum(R)
+                min_snp_pvalue = min(self._GWAS.get(rsid) for rsid in R)
 
                 RES = self._scoreThread(EVL,S,self._GENESYMB[gene],method,mode,reqacc,intlimit)
 
                 if (RES[1][1]==0 or RES[1][1]==5) and RES[1][0] > 0 and RES[1][0] <= 1 and (RES[1][0] > reqacc*1e3 or ( (method=='auto' or method=='satterthwaite' or method=='pearson' or method=='saddle')  )):
-                    RESULT[GID][0].append( [self._GENEIDtoSYMB[RES[0]],float(RES[1][0]),len(R)])
+                    RESULT[GID][0].append( [self._GENEIDtoSYMB[RES[0]],float(RES[1][0]),len(R), float(min_snp_pvalue)])
                 else:
-                    RESULT[GID][1].append([self._GENEIDtoSYMB[RES[0]],len(R),RES[1]])
+                    RESULT[GID][1].append([self._GENEIDtoSYMB[RES[0]],len(R),RES[1], float(min_snp_pvalue)])
 
             
             else:
 
                 if len(R) == 1:
-                    RESULT[GID][0].append( [self._GENEIDtoSYMB[G[i]],float(self._GWAS[R[0]]),1] )
+                    RESULT[GID][0].append( [self._GENEIDtoSYMB[G[i]],float(self._GWAS[R[0]]),1, float(self._GWAS[R[0]])] )
                 else:
                     RESULT[GID][2].append([self._GENEIDtoSYMB[G[i]],"No SNPs"])
 

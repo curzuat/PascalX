@@ -657,6 +657,9 @@ class chi2sum:
 
                 if len(R) > 1:
                     # Score
+                    # Get SNP with smallest pvalue for this gene #Downstreamer
+                    min_snp_pvalue = min(self._GWAS.get(rsid) for rsid in R)
+
                     if self._MAP is not None and self._joint == False:
                         S = self._getChi2Sum_mapper(R,G[i]) 
                     else:
@@ -665,7 +668,7 @@ class chi2sum:
                     RES = self._scoreThread(self._calcAndFilterEV(C),S,G[i],method,mode,reqacc,intlimit)
 
                     if (RES[1][1]==0 or RES[1][1]==5) and RES[1][0] > 0 and RES[1][0] <= 1 and (RES[1][0] > reqacc*1e3 or ( (method=='auto' or method=='satterthwaite' or method=='pearson' or method=='saddle')  )):
-                        RESULT.append( [self._GENEIDtoSYMB[RES[0]],float(RES[1][0]),len(R)])
+                        RESULT.append( [self._GENEIDtoSYMB[RES[0]],float(RES[1][0]),len(R),float(min_snp_pvalue)] )
                     else:
                             FAIL.append([self._GENEIDtoSYMB[RES[0]],len(R),RES[1]])
 
@@ -677,9 +680,9 @@ class chi2sum:
                     if len(R) == 1:
                         if self._MAP is not None and self._joint == False:
                             if R[0] in self._MAP[G[i]]:
-                                RESULT.append( [self._GENEIDtoSYMB[G[i]],float(self._MAP[G[i]][R[0]][0]),1] )
+                                RESULT.append( [self._GENEIDtoSYMB[G[i]],float(self._MAP[G[i]][R[0]][0]),1,float(self._MAP[G[i]][R[0]][0])] )
                         else:
-                            RESULT.append( [self._GENEIDtoSYMB[G[i]],float(self._GWAS[R[0]]),1] )
+                            RESULT.append( [self._GENEIDtoSYMB[G[i]],float(self._GWAS[R[0]]),1,float(self._GWAS[R[0]])] )
                     else:
                         TOTALFAIL.append([self._GENEIDtoSYMB[G[i]],"No SNPs"])
 
@@ -951,7 +954,7 @@ class chi2sum:
             RESULT[GID] = [[],[],[]]
             
             if gene not in self._GENESYMB:
-                RESULT[GID][2].append([self._GENEIDtoSYMB[G[i]],"Not in annotation"])
+                RESULT[GID][2].append([gene, "Not in annotation"])
                 continue
                 
             # Set SNP data
@@ -973,10 +976,10 @@ class chi2sum:
             else:
 
                 if len(R) == 1:
-                    RESULT[GID][0].append( [self._GENEIDtoSYMB[G[i]],float(self._GWAS[R[0]]),1, float(self._GWAS[R[0]])] )
+                    RESULT[GID][0].append( [gene, float(self._GWAS[R[0]]), 1, float(self._GWAS[R[0]])] )
                 else:
-                    RESULT[GID][2].append([self._GENEIDtoSYMB[G[i]],"No SNPs"])
-
+                    RESULT[GID][2].append([gene, "No SNPs"])
+ 
         
                 
         return RESULT
